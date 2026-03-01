@@ -44,13 +44,13 @@ $env:FLUTTER_STORAGE_BASE_URL = "https://storage.flutter-io.cn"
 $env:PUB_HOSTED_URL = "https://pub.flutter-io.cn"
 
 Write-Host "Building APK (split-per-abi)..."
-fvm flutter build apk --release --split-per-abi --dart-define="APP_NAME=$appName"
+fvm flutter build apk --debug --split-per-abi --dart-define="APP_NAME=$appName"
 
 $outputDir = "build/app/outputs/flutter-apk"
 $abiMap = @{
-    "arm64-v8a" = "app-arm64-v8a-release.apk"
-    "armeabi-v7a" = "app-armeabi-v7a-release.apk"
-    "x86_64" = "app-x86_64-release.apk"
+    "arm64-v8a" = "app-arm64-v8a-debug.apk"
+    "armeabi-v7a" = "app-armeabi-v7a-debug.apk"
+    "x86_64" = "app-x86_64-debug.apk"
 }
 
 $found = $false
