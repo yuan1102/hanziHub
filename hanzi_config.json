@@ -1,0 +1,35 @@
+{
+  "version": "1.1.0",
+  "description": "汉字学习应用配置文件 - 支持远程视频加载",
+  "characters": [
+    {
+      "name": "绿",
+      "pinyin": "lü",
+      "tone": 3,
+      "meaning": "颜色，绿色",
+      "videoFile": "绿.mp4",
+      "videoSource": "remote",
+      "videoUrl": "https://cdn.jsdelivr.net/gh/yuan1102/hanziHub@main/mp4/绿.mp4",
+      "duration": 43.7,
+      "fileSize": "1.8M"
+    },
+    {
+      "name": "蓝",
+      "pinyin": "",
+      "tone": 3,
+      "meaning": "颜色，蓝色",
+      "videoFile": "蓝.mp4",
+      "videoSource": "remote",
+      "videoUrl": "https://cdn.jsdelivr.net/gh/yuan1102/hanziHub@main/mp4/蓝.mp4",
+      "duration": 43.7,
+      "fileSize": "1.8M"
+    }
+  ],
+  "metadata": {
+    "totalCharacters": 1,
+    "videoDirectory": "mp4/",
+    "cdnUrl": "https://cdn.jsdelivr.net/gh/yuan1102/hanziHub@main",
+    "lastUpdated": "2026-03-01",
+    "notes": "videoSource 类型: 'remote'=远程CDN, 'builtin'=内置资源, 'external'=本地文件"
+  }
+}

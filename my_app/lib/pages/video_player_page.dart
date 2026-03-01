@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/character_entry.dart';
+import '../services/video_cache_manager.dart';
 import '../widgets/video_controls_overlay.dart';
 
 /// 视频播放页
@@ -66,6 +68,29 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         case VideoSource.userUploaded:
           final docDir = await getApplicationDocumentsDirectory();
           media = Media('${docDir.path}/${widget.entry.videoPath}');
+          break;
+        case VideoSource.remote:
+          // 远程视频：智能播放策略
+          // 1. 首次：直接播放在线地址（即时播放）
+          // 2. 静默后台下载并缓存
+          // 3. 后续：使用缓存（无需下载）
+          final videoUrl = widget.entry.videoUrl ?? '';
+          final cachedPath = await VideoCacheManager.getCachePath(videoUrl);
+          final videoFile = File(cachedPath);
+
+          // 检查是否已有缓存
+          if (await videoFile.exists()) {
+            // 缓存存在：使用缓存播放
+            debugPrint('使用缓存视频: $cachedPath');
+            media = Media(cachedPath);
+          } else {
+            // 缓存不存在：直接播放在线地址（即时响应）
+            debugPrint('直接播放在线视频: $videoUrl');
+            media = Media(videoUrl);
+
+            // 同时后台静默下载缓存（不阻塞 UI）
+            _silentDownloadVideo(videoUrl);
+          }
           break;
       }
 
@@ -200,6 +225,21 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     _startHideControlsTimer();
   }
 
+  /// 静默后台下载视频（不显示加载界面）
+  Future<void> _silentDownloadVideo(String videoUrl) async {
+    try {
+      debugPrint('后台静默下载视频: $videoUrl');
+      final cachedPath = await VideoCacheManager.getOrDownloadVideo(videoUrl);
+
+      if (cachedPath != null) {
+        debugPrint('视频已缓存: $cachedPath');
+      }
+    } catch (e) {
+      debugPrint('后台下载失败（忽略）: $e');
+      // 静默失败，不显示任何错误信息，用户已在线播放了
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -233,7 +273,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             CircularProgressIndicator(strokeWidth: 3),
             SizedBox(height: 16),
             Text(
-              '视频加载中...',
+              '视频初始化中...',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:lpinyin/lpinyin.dart';
 
 import '../models/character_entry.dart';
+import '../services/config_loader.dart';
 
 abstract class CharacterRepository {
   Future<List<CharacterEntry>> loadCharacters();
@@ -40,8 +41,8 @@ class PersistentCharacterRepository implements CharacterRepository {
       debugPrint('$st');
     }
 
-    // 内置视频始终从 AssetManifest 实时扫描，确保与 assets 目录同步
-    final scannedBuiltIn = await _scanBuiltInVideos();
+    // 优先从线上配置加载（线上 → 缓存 → 内置），然后回退到 AssetManifest 扫描
+    final scannedBuiltIn = await _loadBuiltInVideos();
 
     // 合并：内置视频用扫描结果，但保留 JSON 中已有的学习状态
     final builtInEntries = scannedBuiltIn.map((scanned) {
@@ -109,6 +110,36 @@ class PersistentCharacterRepository implements CharacterRepository {
     await _writeJson(entries);
   }
 
+  /// 加载内置视频（优先线上配置 → 缓存 → AssetManifest 扫描）
+  Future<List<CharacterEntry>> _loadBuiltInVideos() async {
+    try {
+      // 尝试从 ConfigLoader 加载（线上 → 缓存 → 内置）
+      final configItems = await ConfigLoader.loadConfig();
+
+      if (configItems.isNotEmpty) {
+        debugPrint('从配置加载到 ${configItems.length} 个汉字');
+
+        // 转换为 CharacterEntry
+        return configItems.map((item) {
+          return CharacterEntry(
+            name: item.name,
+            pinyin: item.pinyin,
+            videoSource: item.videoSource == 'remote'
+                ? VideoSource.remote
+                : VideoSource.builtIn,
+            videoUrl: item.videoSource == 'remote' ? item.videoUrl : null,
+          );
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint('从配置加载失败，回退到扫描: $e');
+    }
+
+    // 配置加载失败，回退到 AssetManifest 扫描
+    return await _scanBuiltInVideos();
+  }
+
+  /// 从 AssetManifest 扫描内置视频（当配置加载失败时作为备选方案）
   Future<List<CharacterEntry>> _scanBuiltInVideos() async {
     try {
       final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
@@ -140,7 +171,7 @@ class PersistentCharacterRepository implements CharacterRepository {
       }
       return entries;
     } catch (e, st) {
-      debugPrint('扫描 AssetManifest 失败: $e');
+      debugPrint('扫描内置视频失败: $e');
       debugPrint('$st');
       return [];
     }
