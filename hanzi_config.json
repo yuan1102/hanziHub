@@ -23,13 +23,24 @@
       "videoUrl": "https://cdn.jsdelivr.net/gh/yuan1102/hanziHub@main/mp4/蓝.mp4",
       "duration": 43.7,
       "fileSize": "1.8M"
+    },
+    {
+      "name": "黄",
+      "pinyin": "huáng",
+      "tone": 2,
+      "meaning": "颜色，黄色",
+      "videoFile": "黄.mp4",
+      "videoSource": "remote",
+      "videoUrl": "https://cdn.jsdelivr.net/gh/yuan1102/hanziHub@main/mp4/黄.mp4",
+      "duration": 43.7,
+      "fileSize": "12M"
     }
   ],
   "metadata": {
-    "totalCharacters": 1,
+    "totalCharacters": 3,
     "videoDirectory": "mp4/",
     "cdnUrl": "https://cdn.jsdelivr.net/gh/yuan1102/hanziHub@main",
-    "lastUpdated": "2026-03-01",
+    "lastUpdated": "2026-03-03",
     "notes": "videoSource 类型: 'remote'=远程CDN, 'builtin'=内置资源, 'external'=本地文件"
   }
 }
